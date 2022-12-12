@@ -12,4 +12,8 @@
 ```
 docker-compose up -d
 ```
-6. run proyect ``` yarn start:dev ```
+6. Run Seed
+```
+http://localhost:3000/api/v2/seed
+```
+7. run proyect ``` yarn start:dev ```
