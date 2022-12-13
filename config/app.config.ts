@@ -7,6 +7,7 @@ export const EnvConfiguration = () => ({
     db_pass: process.env.DB_PASS,
     db_port: process.env.DB_PORT,
     app_port: process.env.APP_PORT,
-    host_api: process.env.HOST_API
+    host_api: process.env.HOST_API,
+    jwt_secret: process.env.JWT_SECRET || 'otherS3cr3t'
     
 });

@@ -1,6 +1,5 @@
 import { BadRequestException, 
   Injectable, 
-  InternalServerErrorException, 
   Logger, 
   NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +9,7 @@ import { validate as isUUID } from 'uuid';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { UpdateProductDto,CreateProductDto } from './dto';
 import { ProductImage,Product } from './entities';
+import { handleDBExeption } from 'src/common/errorExeptions/exeptions-commons';
 
 @Injectable()
 export class ProductsService {
@@ -46,7 +46,7 @@ export class ProductsService {
 
       return {...product, images};
     } catch (error) {
-      this.handleDBExeption(error);
+      handleDBExeption(error);
     }
   }
 
@@ -145,7 +145,7 @@ export class ProductsService {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
 
-      this.handleDBExeption(error);
+      handleDBExeption(error);
     }
     
     
@@ -166,17 +166,9 @@ export class ProductsService {
       .execute();
       
     } catch (error) {
-      this.handleDBExeption(error);
+      handleDBExeption(error);
     }
   }
 
-  private handleDBExeption( error:any ){
-
-     if ( error.code === '23505' )
-         throw new BadRequestException(error.detail);
-
-     this.logger.error(error);
-     console.log(error);
-     throw new InternalServerErrorException('Unexpected error, check server logs');
-  }
+ 
 }
