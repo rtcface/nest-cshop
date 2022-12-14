@@ -1,6 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto';
+import { User } from './entities/user.entity';
+import { GetUser,RawHeaders } from './decorators'
 
 
 @Controller('auth')
@@ -17,10 +20,20 @@ export class AuthController {
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto); 
   }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Get('private')
+  @UseGuards( AuthGuard() )
+  testingPrivateRoute( 
+    @GetUser() user:User,
+    @GetUser('fullName') FullName:string,
+    @RawHeaders() rawHeaders: string[]
+    ): { ok: boolean; message: string; user: User; FullName: string; rawHeaders: any; } {   
+    return { 
+      ok:true,
+      message:'all ok',
+      user,
+      FullName,
+      rawHeaders
+    }
   }
 
   @Get(':id')

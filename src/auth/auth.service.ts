@@ -22,13 +22,16 @@ export class AuthService {
 
       const user = this.userRepository.create({
         ...userData,
-        password: bcrypt.hashSync(password, 15),
+        password: bcrypt.hashSync(password, 5),
       });
 
       await this.userRepository.save(user);
       delete user.password;
       //TODO: return Json TOKEN
-      return user;
+      return {
+        ...user,
+        token: this.getJwtToken({uuid: user.id})
+      };  
     } catch (error) {
       handleDBExeption(error);
     }
@@ -38,7 +41,7 @@ export class AuthService {
     const { password, email } = loginUserDto;
     const user = await this.userRepository.findOne({ 
     where:{ email },
-    select: { email:true ,password:true }
+    select: { id:true ,password:true }
      });
 
      if( !user )
@@ -47,7 +50,7 @@ export class AuthService {
     if( bcrypt.compareSync(password, user.password) ){
       return {
         ...user,
-        token: this.getJwtToken({email: user.email})
+        token: this.getJwtToken({uuid: user.id})
       };   
     }
     
@@ -58,6 +61,7 @@ export class AuthService {
 
 
   private getJwtToken ( payload:JwtPayload ){
+    console.log(payload);
     const token = this.jwtService.sign(payload)
 
     return token;
