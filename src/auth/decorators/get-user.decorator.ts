@@ -4,7 +4,6 @@ import { createParamDecorator, ExecutionContext, InternalServerErrorException } 
 
 export const GetUser = createParamDecorator( 
     (data,ctx:ExecutionContext) => {
-    console.log("data>>",data);
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
 

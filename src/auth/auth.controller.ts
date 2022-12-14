@@ -1,12 +1,21 @@
-import { Controller, Get, Post, Body, UseGuards, Headers, SetMetadata } from '@nestjs/common';
+/* #region  Imports */
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, LoginUserDto, CheckAuthStatusDto } from './dto';
 import { User } from './entities/user.entity';
-import { GetUser,RawHeaders } from './decorators'
+import { Auth, GetUser, RawHeaders, RoleProtected } from './decorators';
 import { IncomingHttpHeaders } from 'http';
-import { UserRoleGuard } from './guards/user-role/user-role.guard';
-
+import { UserRoleGuard } from './guards/user-role.guard';
+import { ValidRoles } from './interfaces';
+/* #endregion */
 
 @Controller('auth')
 export class AuthController {
@@ -14,43 +23,70 @@ export class AuthController {
 
   @Post('register')
   createUser(@Body() createUserDto: CreateUserDto) {
-    return this.authService.create(createUserDto);
+    return this.authService.createUser(createUserDto);
   }
-
 
   @Post('login')
   loginUser(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.login(loginUserDto); 
+    return this.authService.login(loginUserDto);
   }
+
+  @Get('refresh-token')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User){
+    return this.authService.refreshToken(user);
+  }
+
+  // checkAuthStatus(@Body() checkAuthStatusDto: CheckAuthStatusDto){
+  //   return this.authService.refreshToken(checkAuthStatusDto);
+  // }
+
+
+
+  /* #region  Controller Test Demo */
   @Get('private')
-  @UseGuards( AuthGuard() )
-  testingPrivateRoute( 
-    @GetUser() user:User,
-    @GetUser('fullName') FullName:string,
+  @UseGuards(AuthGuard())
+  testingPrivateRoute(
+    @GetUser() user: User,
+    @GetUser('fullName') FullName: string,
     @RawHeaders() rawHeaders: string[],
-    @Headers() headers:IncomingHttpHeaders
-    ): { ok: boolean; message: string; user: User; FullName: string; rawHeaders: any; headers:any } {   
-    return { 
-      ok:true,
-      message:'all ok',
+    @Headers() headers: IncomingHttpHeaders,
+  ): {
+    ok: boolean;
+    message: string;
+    user: User;
+    FullName: string;
+    rawHeaders: any;
+    headers: any;
+  } {
+    return {
+      ok: true,
+      message: 'all ok',
       user,
       FullName,
       rawHeaders,
-      headers
-    }
+      headers,
+    };
   }
 
+  // @SetMetadata('roles',['admin','super-user'])
   @Get('private2')
-  @SetMetadata('roles',['admin','super-user'])
-  @UseGuards( AuthGuard(), UserRoleGuard )
-  privateRoute2(
-    @GetUser() user: User,
-  ){
+  @RoleProtected(ValidRoles.superuser)
+  @UseGuards(AuthGuard(), UserRoleGuard)
+  privateRoute2(@GetUser() user: User) {
     return {
-      ok:true,
-      user
-    }
+      ok: true,
+      user,
+    };
   }
 
- 
+  @Get('private3')
+  @Auth(ValidRoles.admin, ValidRoles.superuser)
+  private3(@GetUser() user: User) {
+    return {
+      ok: true,
+      user,
+    };
+  }
+  /* #endregion */
 }

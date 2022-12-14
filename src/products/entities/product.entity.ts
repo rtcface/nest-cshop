@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../auth/entities/user.entity";
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProductImage } from "./product-image.entity";
 
 @Entity({name:'catProducts'})
@@ -51,6 +52,14 @@ export class Product {
 
      )
     images:ProductImage[];
+
+    @ManyToOne(
+        () => User,
+        ( user ) => user.product,
+        {eager:true}
+    )
+    user: User
+
 
     @BeforeInsert()
     checkSlugInsert(){
