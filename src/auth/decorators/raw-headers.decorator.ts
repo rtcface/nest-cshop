@@ -7,9 +7,6 @@ export const RawHeaders = createParamDecorator(
         const req = ctx.switchToHttp().getRequest();
         console.log(req.rawHeaders);
         const rawHeaders= req.rawHeaders;
-
-        if(!rawHeaders)
-            throw new InternalServerErrorException('rawHeaders not found');
-
+        
         return rawHeaders;
 });
