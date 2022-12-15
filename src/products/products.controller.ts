@@ -6,14 +6,18 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from '../common/dtos/pagination.dto';
 import { Auth, GetUser } from '../auth/decorators';
 import { User } from '../auth/entities/user.entity';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
-
+@ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @Auth()  
+  @Auth()
+  @ApiResponse({ status: 201, description: 'Product was create' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })  
+  @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
   create(@Body() createProductDto: CreateProductDto,@GetUser() user:User ) {
     return this.productsService.create( createProductDto, user );
   }
